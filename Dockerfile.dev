@@ -1,0 +1,16 @@
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+WORKDIR /app
+# COPY ["src/API/.nuget/nuget.config", "/"]
+# COPY ["src/.build", ".build/"]
+
+COPY . ./
+
+# RUN dotnet restore "/src/API/API.csproj" --configfile /nuget.config
+RUN dotnet restore src/API/API.sln
+RUN dotnet publish src/API/API.sln -c Release -o /app/out
+
+FROM mcr.microsoft.com/dotnet/aspnet:7.0
+WORKDIR /app
+COPY --from=build /app/out .
+EXPOSE 80
+ENTRYPOINT ["dotnet", "API.dll"]
